@@ -1,4 +1,4 @@
-const db = require("../localdb");
+const db = require("../../localdb");
 
 function createJob(job) {
   const sql = `INSERT INTO jobs (title, company, location, salary, description) VALUES (?, ?, ?, ?, ?)`;
