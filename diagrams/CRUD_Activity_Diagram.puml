@@ -1,0 +1,155 @@
+@startuml CRUD_Activity_Diagram
+title CRUD Activity Diagram for Candidate, Employer, and Job
+
+start
+
+:User Selects Entity;
+
+if (Entity Type?) then (CANDIDATE)
+
+  :User Selects Operation;
+
+  if (Operation Type?) then (CREATE)
+    :Input Candidate Data\n(Name, Email, Skills, etc.);
+    :Validate Data;
+    if (Valid Data?) then (Yes)
+      :Generate Unique ID;
+      :Add Timestamp;
+      :Store in Database;
+      :Return Confirmation;
+      :Success ✓;
+    else (No)
+      :Display Error;
+      :Retry;
+    endif
+  else if (READ) then
+    :Enter Candidate ID or Search;
+    :Query Database;
+    if (Found?) then (Yes)
+      :Display Details;
+      :Success ✓;
+    else (No)
+      :Not Found Message;
+    endif
+  else if (UPDATE) then
+    :Enter Candidate ID;
+    :Input Updated Fields;
+    :Validate;
+    if (Valid?) then (Yes)
+      :Update Record;
+      :Success ✓;
+    else (No)
+      :Error;
+    endif
+  else if (DELETE) then
+    :Enter Candidate ID;
+    :Confirm Deletion;
+    if (Confirmed?) then (Yes)
+      :Remove Record;
+      :Success ✓;
+    else (No)
+      :Cancelled;
+    endif
+  endif
+
+else if (EMPLOYER) then
+
+  :User Selects Operation;
+
+  if (Operation Type?) then (CREATE)
+    :Input Employer Data\n(Name, Email, Company, Industry, etc.);
+    :Validate Data;
+    if (Valid Data?) then (Yes)
+      :Generate Unique ID;
+      :Add Timestamp;
+      :Store in Database;
+      :Return Confirmation;
+      :Success ✓;
+    else (No)
+      :Display Error;
+      :Retry;
+    endif
+  else if (READ) then
+    :Enter Employer ID or Search;
+    :Query Database;
+    if (Found?) then (Yes)
+      :Display Details;
+      :Success ✓;
+    else (No)
+      :Not Found Message;
+    endif
+  else if (UPDATE) then
+    :Enter Employer ID;
+    :Input Updated Fields;
+    :Validate;
+    if (Valid?) then (Yes)
+      :Update Record;
+      :Success ✓;
+    else (No)
+      :Error;
+    endif
+  else if (DELETE) then
+    :Enter Employer ID;
+    :Confirm Deletion;
+    if (Confirmed?) then (Yes)
+      :Remove Record;
+      :Success ✓;
+    else (No)
+      :Cancelled;
+    endif
+  endif
+
+else if (JOB) then
+
+  :User Selects Operation;
+
+  if (Operation Type?) then (CREATE)
+    :Input Job Data\n(Title, Description, Employer, Salary, Skills, etc.);
+    :Validate Data;
+    if (Valid Data?) then (Yes)
+      :Generate Unique ID;
+      :Add Timestamp;
+      :Store in Database;
+      :Return Confirmation;
+      :Success ✓;
+    else (No)
+      :Display Error;
+      :Retry;
+    endif
+  else if (READ) then
+    :Enter Job ID or Search;
+    :Query Database;
+    if (Found?) then (Yes)
+      :Display Details;
+      :Success ✓;
+    else (No)
+      :Not Found Message;
+    endif
+  else if (UPDATE) then
+    :Enter Job ID;
+    :Input Updated Fields;
+    :Validate;
+    if (Valid?) then (Yes)
+      :Update Record;
+      :Success ✓;
+    else (No)
+      :Error;
+    endif
+  else if (DELETE) then
+    :Enter Job ID;
+    :Confirm Deletion;
+    if (Confirmed?) then (Yes)
+      :Remove Record;
+      :Success ✓;
+    else (No)
+      :Cancelled;
+    endif
+  endif
+
+endif
+
+:Operation Complete;
+
+stop
+
+@enduml
