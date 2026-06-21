@@ -12,13 +12,13 @@ app.get("/", (req, res) => {
     res.send("Server OK");
 });
 
-// Register Job routes
+// Job routes
 registerJobModule(app);
 
-// Register Application routes
+// Application routes
 registerApplicationModule(app);
 
-// Register Candidate routes
+// Candidate routes
 registerCandidateModule(app);
 
 const PORT = process.env.PORT || 3000;
