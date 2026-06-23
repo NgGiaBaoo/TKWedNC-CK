@@ -2,10 +2,8 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const db = require("./localdb");
-const registerJobModule = require("./src/jobs/jobModule");
-const registerApplicationModule = require("./src/applications/applicationModule");
-const registerCandidateModule = require("./src/candidates/candidateModule");
-const registerUserModule = require("./src/user/userModule");
+const { requireAuth } = require("./src/auth/authMiddleware");
+const registerAuthModule = require("./src/auth/authModule");
 
 const app = express();
 
@@ -38,17 +36,12 @@ app.get("/set-cookie", (req, res) => {
     res.json("Cookies set!");
 });
 
-// Job routes
-registerJobModule(app);
+registerAuthModule(app);
 
-// Application routes
-registerApplicationModule(app);
-
-// Candidate routes
-registerCandidateModule(app);
-
-// User routes
-registerUserModule(app);
+app.use("/jobs", requireAuth, require("./src/jobs/jobController"));
+app.use("/applications", requireAuth, require("./src/applications/applicationController"));
+app.use("/candidates", requireAuth, require("./src/candidates/candidateController"));
+app.use("/users", requireAuth, require("./src/user/userController"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
