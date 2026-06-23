@@ -18,8 +18,23 @@ app.use(
   }),
 );
 
-app.get("/", (req, res) => {
-    res.send("Server OK");
+// Visit counter route
+app.get("/visits", (req, res) => {
+    req.session.visits = req.session.visits ? req.session.visits + 1 : 1;
+    res.json({ visits: req.session.visits });
+});
+
+// Read Cookie route
+app.get("/read-cookie", (req, res) => {
+    console.log(req.cookies);
+    console.log(req.signedCookies);
+    res.json({ cookies: req.cookies, signedCookies: req.signedCookies });
+});
+
+// Write Cookie route
+app.get("/set-cookie", (req, res) => {
+    res.cookie("key", "value", { signed: true });
+    res.json("Cookies set!");
 });
 
 // Job routes
