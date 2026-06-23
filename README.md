@@ -144,6 +144,11 @@ flowchart TD
 | `GET` | `/candidates/:id` | Lấy candidate theo ID |
 | `PUT` | `/candidates/:id` | Cập nhật candidate |
 | `DELETE` | `/candidates/:id` | Xoá candidate |
+| `POST` | `/users` | Tạo user mới |  |
+| `GET` | `/users` | Lấy danh sách users |
+| `GET` | `/users/:id` | Lấy user theo ID |
+| `PUT` | `/users/:id` | Cập nhật user |
+| `DELETE` | `/users/:id` | Xoá user |
 
 ## Cách chạy
 

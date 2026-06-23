@@ -5,6 +5,7 @@ const db = require("./localdb");
 const registerJobModule = require("./src/jobs/jobModule");
 const registerApplicationModule = require("./src/applications/applicationModule");
 const registerCandidateModule = require("./src/candidates/candidateModule");
+const registerUserModule = require("./src/user/userModule");
 
 const app = express();
 
@@ -45,6 +46,9 @@ registerApplicationModule(app);
 
 // Candidate routes
 registerCandidateModule(app);
+
+// User routes
+registerUserModule(app);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
