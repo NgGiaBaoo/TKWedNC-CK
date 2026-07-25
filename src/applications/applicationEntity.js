@@ -9,12 +9,12 @@ function validateApplication(payload) {
 }
 
 function normalize(payload) {
+  const status = payload.status || "Pending";
   return {
     candidateId: payload.candidateId || null,
     jobId: payload.jobId || null,
     applyDate: payload.applyDate || new Date(),
-    status: payload.status || 'pending',
-    note: payload.note || null
+    status: status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
   };
 }
 

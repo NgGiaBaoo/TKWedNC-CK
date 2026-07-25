@@ -1,47 +1,67 @@
-const candidates = [];
-let nextId = 1;
+const db = require("../../localdb");
+
+function mapCandidateRow(row) {
+  return {
+    id: row.CandidateID,
+    userId: row.UserID,
+    fullName: row.FullName,
+    email: row.Email,
+    phone: row.Phone,
+    skills: row.Skills
+  };
+}
 
 function create(data) {
-  const candidate = {
-    id: nextId++,
-    fullname: data.fullname || null,
-    email: data.email || null,
-    phone: data.phone || null,
-    address: data.address || null,
-    skill: data.skill || null,
-    experience: data.experience || null,
-    cvUrl: data.cvUrl || null,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
-  candidates.push(candidate);
-  return candidate;
+  const sql = `INSERT INTO Candidates (UserID, FullName, Email, Phone, Skills) VALUES (?, ?, ?, ?, ?)`;
+  const params = [data.userId, data.fullName, data.email, data.phone, data.skills];
+  return new Promise((resolve, reject) => {
+    db.query(sql, params, (err, result) => {
+      if (err) return reject(err);
+      resolve({ id: result.insertId, ...data });
+    });
+  });
 }
 
 function findAll() {
-  return candidates;
+  return new Promise((resolve, reject) => {
+    db.query("SELECT CandidateID, UserID, FullName, Email, Phone, Skills FROM Candidates", (err, results) => {
+      if (err) return reject(err);
+      resolve(results.map(mapCandidateRow));
+    });
+  });
 }
 
 function findOne(id) {
-  return candidates.find((c) => c.id === parseInt(id)) || null;
+  return new Promise((resolve, reject) => {
+    db.query(
+      "SELECT CandidateID, UserID, FullName, Email, Phone, Skills FROM Candidates WHERE CandidateID = ?",
+      [id],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results[0] ? mapCandidateRow(results[0]) : null);
+      }
+    );
+  });
 }
 
 function update(id, data) {
-  const candidate = findOne(id);
-  if (!candidate) {
-    throw new Error(`Candidate with id ${id} not found`);
-  }
-  Object.assign(candidate, data, { updatedAt: new Date() });
-  return candidate;
+  const sql = `UPDATE Candidates SET UserID = ?, FullName = ?, Email = ?, Phone = ?, Skills = ? WHERE CandidateID = ?`;
+  const params = [data.userId, data.fullName, data.email, data.phone, data.skills, id];
+  return new Promise((resolve, reject) => {
+    db.query(sql, params, (err, result) => {
+      if (err) return reject(err);
+      resolve(result.affectedRows > 0 ? { id: Number(id), ...data } : null);
+    });
+  });
 }
 
 function remove(id) {
-  const index = candidates.findIndex((c) => c.id === parseInt(id));
-  if (index === -1) {
-    throw new Error(`Candidate with id ${id} not found`);
-  }
-  candidates.splice(index, 1);
-  return true;
+  return new Promise((resolve, reject) => {
+    db.query("DELETE FROM Candidates WHERE CandidateID = ?", [id], (err, result) => {
+      if (err) return reject(err);
+      resolve(result.affectedRows > 0);
+    });
+  });
 }
 
 module.exports = { create, findAll, findOne, update, remove };

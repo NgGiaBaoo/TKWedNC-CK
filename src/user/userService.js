@@ -3,16 +3,33 @@ const db = require("../../localdb");
 
 const SALT_ROUNDS = 10;
 
+function normalizeRole(role) {
+  const allowed = ["Admin", "Employer", "Candidate"];
+  if (!role || !allowed.includes(role)) {
+    return "Candidate";
+  }
+  return role;
+}
+
+function mapUserRow(row) {
+  return {
+    id: row.UserID,
+    username: row.Username,
+    role: row.Role
+  };
+}
+
 function createUser(user) {
   return new Promise(async (resolve, reject) => {
     try {
       const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
-      const sql = `INSERT INTO users (username, password_hash) VALUES (?, ?)`;
-      const params = [user.username, hashedPassword];
+      const role = normalizeRole(user.role);
+      const sql = `INSERT INTO Users (Username, PasswordHash, Role) VALUES (?, ?, ?)`;
+      const params = [user.username, hashedPassword, role];
 
       db.query(sql, params, (err, result) => {
         if (err) return reject(err);
-        resolve({ id: result.insertId, username: user.username });
+        resolve({ id: result.insertId, username: user.username, role });
       });
     } catch (err) {
       reject(err);
@@ -22,16 +39,16 @@ function createUser(user) {
 
 function getAllUsers() {
   return new Promise((resolve, reject) => {
-    db.query("SELECT id, username FROM users", (err, results) => {
+    db.query("SELECT UserID, Username, Role FROM Users", (err, results) => {
       if (err) return reject(err);
-      resolve(results);
+      resolve(results.map(mapUserRow));
     });
   });
 }
 
 function getUserRecordById(id) {
   return new Promise((resolve, reject) => {
-    db.query("SELECT id, username, password_hash FROM users WHERE id = ?", [id], (err, results) => {
+    db.query("SELECT UserID, Username, PasswordHash, Role FROM Users WHERE UserID = ?", [id], (err, results) => {
       if (err) return reject(err);
       resolve(results[0] || null);
     });
@@ -60,18 +77,19 @@ function updateUser(id, user) {
         return resolve(null);
       }
 
-      const username = user.username || currentUser.username;
+      const username = user.username || currentUser.Username;
       const password = user.password
         ? await bcrypt.hash(user.password, SALT_ROUNDS)
-        : currentUser.password_hash;
+        : currentUser.PasswordHash;
+      const role = normalizeRole(user.role || currentUser.Role);
 
-      const sql = `UPDATE users SET username = ?, password_hash = ? WHERE id = ?`;
-      const params = [username, password, id];
+      const sql = `UPDATE Users SET Username = ?, PasswordHash = ?, Role = ? WHERE UserID = ?`;
+      const params = [username, password, role, id];
 
       db.query(sql, params, (err, result) => {
         if (err) return reject(err);
         if (result.affectedRows === 0) return resolve(null);
-        resolve({ id: Number(id), username });
+        resolve({ id: Number(id), username, role });
       });
     } catch (err) {
       reject(err);
@@ -81,7 +99,7 @@ function updateUser(id, user) {
 
 function deleteUser(id) {
   return new Promise((resolve, reject) => {
-    db.query("DELETE FROM users WHERE id = ?", [id], (err, result) => {
+    db.query("DELETE FROM Users WHERE UserID = ?", [id], (err, result) => {
       if (err) return reject(err);
       resolve(result.affectedRows > 0);
     });

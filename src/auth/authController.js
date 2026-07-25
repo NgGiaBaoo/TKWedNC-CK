@@ -19,6 +19,7 @@ router.post("/register", async (req, res) => {
     // Auto-login after registration
     req.session.userId = created.id;
     req.session.username = created.username;
+    req.session.role = created.role;
     res.status(201).json({
       message: "User registered successfully",
       data: created
@@ -52,10 +53,11 @@ router.post("/login", async (req, res) => {
     // Store user info in session
     req.session.userId = result.user.id;
     req.session.username = result.user.username;
+    req.session.role = result.user.role;
 
     res.json({
       message: "Login successful",
-      data: { id: result.user.id, username: result.user.username }
+      data: { id: result.user.id, username: result.user.username, role: result.user.role }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

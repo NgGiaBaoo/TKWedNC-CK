@@ -48,7 +48,7 @@ const connection = mysql.createConnection({
     database: "JOBRECRUITMENT",
 
     ssl: {
-        ca: fs.readFileSync("./ca.pem")
+        ca: fs.readFileSync(path.join(__dirname, "ca.pem"))
     }
 });
 

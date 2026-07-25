@@ -13,7 +13,8 @@ function validateUser(payload) {
 function normalize(payload) {
   return {
     username: payload.username || null,
-    password: payload.password || null
+    password: payload.password || null,
+    role: payload.role || null
   };
 }
 

@@ -1,9 +1,11 @@
+
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const db = require("./localdb");
 const { requireAuth } = require("./src/auth/authMiddleware");
 const registerAuthModule = require("./src/auth/authModule");
+const registerEmployerModule = require("./src/employers/employerModule");
 
 const app = express();
 
@@ -37,6 +39,7 @@ app.get("/set-cookie", (req, res) => {
 });
 
 registerAuthModule(app);
+registerEmployerModule(app);
 
 app.use("/jobs", requireAuth, require("./src/jobs/jobController"));
 app.use("/applications", requireAuth, require("./src/applications/applicationController"));

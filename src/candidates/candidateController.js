@@ -12,7 +12,7 @@ router.post("/", async (req, res) => {
 
   const candidate = normalize(payload);
   try {
-    const created = service.create(candidate);
+    const created = await service.create(candidate);
     res.status(201).json({ message: "Candidate created successfully", data: created });
   } catch (err) {
     res.status(500).json({ message: "Error creating candidate", error: err.message });
@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const candidates = service.findAll();
+    const candidates = await service.findAll();
     res.status(200).json({ message: "All candidates", data: candidates });
   } catch (err) {
     res.status(500).json({ message: "Error fetching candidates", error: err.message });
@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const candidate = service.findOne(req.params.id);
+    const candidate = await service.findOne(req.params.id);
     if (!candidate) {
       return res.status(404).json({ message: `Candidate with id ${req.params.id} not found` });
     }
@@ -43,7 +43,8 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const payload = req.body || {};
   try {
-    const updated = service.update(req.params.id, payload);
+    const candidate = normalize(payload);
+    const updated = await service.update(req.params.id, candidate);
     res.status(200).json({ message: "Candidate updated successfully", data: updated });
   } catch (err) {
     res.status(500).json({ message: "Error updating candidate", error: err.message });
@@ -52,7 +53,10 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-    service.remove(req.params.id);
+    const deleted = await service.remove(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: `Candidate with id ${req.params.id} not found` });
+    }
     res.status(200).json({ message: `Candidate with id ${req.params.id} deleted successfully` });
   } catch (err) {
     res.status(500).json({ message: "Error deleting candidate", error: err.message });

@@ -140,6 +140,20 @@ flowchart TD
 
 Hệ thống sử dụng **session-based authentication** với `express-session` và `cookie-parser`.
 
+Tài khoản người dùng được lưu trong bảng `Users` với các vai trò: `Admin`, `Employer`, `Candidate`.
+
+## Schema MySQL
+
+Các bảng chính hiện có trong Aiven:
+
+| Bảng | Mục đích | Cột chính |
+|------|----------|-----------|
+| `Users` | Tài khoản đăng nhập | `UserID`, `Username`, `PasswordHash`, `Role` |
+| `Employers` | Doanh nghiệp đăng tin | `EmployerID`, `UserID`, `CompanyName`, `Email`, `Phone`, `Address` |
+| `Jobs` | Tin tuyển dụng | `JobID`, `JobTitle`, `Salary`, `Location`, `Description`, `EmployerID` |
+| `Candidates` | Hồ sơ ứng viên | `CandidateID`, `UserID`, `FullName`, `Email`, `Phone`, `Skills` |
+| `Applications` | Đơn ứng tuyển | `ApplicationID`, `CandidateID`, `JobID`, `ApplyDate`, `Status` |
+
 ### API Endpoints
 
 | Method | Endpoint | Mô tả | 
@@ -148,6 +162,11 @@ Hệ thống sử dụng **session-based authentication** với `express-session
 | `POST` | `/auth/login` | Đăng nhập |
 | `POST` | `/auth/logout` | Đăng xuất |
 | `GET` | `/auth/me` | Lấy thông tin user hiện tại |
+| `POST` | `/employers` | Tạo doanh nghiệp |
+| `GET` | `/employers` | Lấy danh sách doanh nghiệp |
+| `GET` | `/employers/:id` | Lấy doanh nghiệp theo ID |
+| `PUT` | `/employers/:id` | Cập nhật doanh nghiệp |
+| `DELETE` | `/employers/:id` | Xoá doanh nghiệp |
 | `POST` | `/jobs` | Tạo job mới |
 | `GET` | `/jobs` | Lấy danh sách jobs |
 | `GET` | `/jobs/:id` | Lấy job theo ID |
@@ -169,7 +188,76 @@ Hệ thống sử dụng **session-based authentication** với `express-session
 | `PUT` | `/users/:id` | Cập nhật user |
 | `DELETE` | `/users/:id` | Xoá user |
 
-> **Lưu ý:** Sau khi đăng ký hoặc đăng nhập thành công, server sẽ set session cookie. Cookie này cần được gửi kèm trong các request tới protected endpoints.
+> **Lưu ý:** Sau khi đăng ký hoặc đăng nhập thành công, server sẽ set session cookie. Cookie này cần được gửi kèm trong các request tới protected endpoints. Khi đăng ký, có thể truyền thêm `role` là `Admin`, `Employer` hoặc `Candidate`.
+
+## Test nhanh bằng Postman
+
+### 1. Đăng ký / đăng nhập
+
+- `POST /auth/register`
+- `POST /auth/login`
+
+Dữ liệu mẫu:
+
+```json
+{
+    "username": "NGB123",
+    "password": "123456",
+    "role": "Candidate"
+}
+```
+
+### 2. Tạo doanh nghiệp
+
+- `POST /employers`
+
+```json
+{
+    "companyName": "Acme Corp",
+    "email": "acme@example.com",
+    "phone": "0123456789",
+    "address": "HCMC"
+}
+```
+
+### 3. Tạo job
+
+- `POST /jobs`
+
+```json
+{
+    "title": "Backend Developer",
+    "employerId": 1,
+    "location": "Remote",
+    "salary": "2500",
+    "description": "Node.js role"
+}
+```
+
+### 4. Tạo candidate
+
+- `POST /candidates`
+
+```json
+{
+    "fullName": "John Doe",
+    "email": "john@example.com",
+    "phone": "0987654321",
+    "skills": "Node.js, MySQL"
+}
+```
+
+### 5. Tạo application
+
+- `POST /applications`
+
+```json
+{
+    "candidateId": 1,
+    "jobId": 1,
+    "status": "Pending"
+}
+```
 
 ## Cách chạy
 
