@@ -6,14 +6,16 @@ const db = require("./localdb");
 const { requireAuth } = require("./src/auth/authMiddleware");
 const registerAuthModule = require("./src/auth/authModule");
 const registerEmployerModule = require("./src/employers/employerModule");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const app = express();
 
 app.use(express.json());
-app.use(cookieParser('your-secret-key'));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(
   session({
-    secret: 'my-secret',
+    secret: process.env.SESSION_KEY,
     resave: false,
     saveUninitialized: false,
   }),
