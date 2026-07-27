@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const service = require("../services/authService");
-const { validateLogin, normalize } = require("../validators/authValidator");
+const service = require("../services/auth");
+const { validateLogin, normalize } = require("../validators/auth");
 const { requireAuth } = require("../middleware/auth");
-const userService = require("../services/userService");
-const { validateUser, normalize: normalizeUser } = require("../validators/userValidator");
+const userService = require("../services/user");
+const { validateUser, normalize: normalizeUser } = require("../validators/user");
 
 // POST /auth/register (public - no auth required)
 router.post("/register", async (req, res) => {

@@ -37,13 +37,13 @@ app.get("/set-cookie", (req, res) => {
     res.json("Cookies set!");
 });
 
-app.use("/auth", require("./src/controllers/authController"));
-app.use("/employers", requireAuth, require("./src/controllers/employerController"));
+app.use("/auth", require("./src/controllers/auth"));
+app.use("/employers", requireAuth, require("./src/controllers/employer"));
 
-app.use("/jobs", requireAuth, require("./src/controllers/jobController"));
-app.use("/applications", requireAuth, require("./src/controllers/applicationController"));
-app.use("/candidates", requireAuth, require("./src/controllers/candidateController"));
-app.use("/users", requireAuth, require("./src/controllers/userController"));
+app.use("/jobs", requireAuth, require("./src/controllers/job"));
+app.use("/applications", requireAuth, require("./src/controllers/application"));
+app.use("/candidates", requireAuth, require("./src/controllers/candidate"));
+app.use("/users", requireAuth, require("./src/controllers/user"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

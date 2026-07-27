@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const service = require("../services/userService");
-const { validateUser, normalize } = require("../validators/userValidator");
+const service = require("../services/user");
+const { validateUser, normalize } = require("../validators/user");
 
 router.post("/", async (req, res) => {
   const payload = req.body || {};

@@ -1,4 +1,4 @@
-const EmployerModel = require("../models/EmployerModel");
+const EmployerModel = require("../models/Employer");
 
 function createEmployer(data) {
   return EmployerModel.createEmployer(data);

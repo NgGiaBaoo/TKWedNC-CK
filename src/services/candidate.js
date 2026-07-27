@@ -1,4 +1,4 @@
-const CandidateModel = require("../models/CandidateModel");
+const CandidateModel = require("../models/Candidate");
 
 function create(data) {
   return CandidateModel.create(data);

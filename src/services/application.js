@@ -1,4 +1,4 @@
-const ApplicationModel = require("../models/ApplicationModel");
+const ApplicationModel = require("../models/Application");
 
 function createApplication(data) {
   return ApplicationModel.createApplication(data);

@@ -1,5 +1,5 @@
-const JobModel = require("../models/JobModel");
-const EmployerModel = require("../models/EmployerModel");
+const JobModel = require("../models/Job");
+const EmployerModel = require("../models/Employer");
 
 function slugifyCompany(companyName) {
   return String(companyName || "employer")
