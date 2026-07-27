@@ -2,10 +2,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
-const db = require("./localdb");
-const { requireAuth } = require("./src/auth/authMiddleware");
-const registerAuthModule = require("./src/auth/authModule");
-const registerEmployerModule = require("./src/employers/employerModule");
+const { requireAuth } = require("./src/middleware/auth");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -40,13 +37,13 @@ app.get("/set-cookie", (req, res) => {
     res.json("Cookies set!");
 });
 
-registerAuthModule(app);
-registerEmployerModule(app);
+app.use("/auth", require("./src/controllers/authController"));
+app.use("/employers", requireAuth, require("./src/controllers/employerController"));
 
-app.use("/jobs", requireAuth, require("./src/jobs/jobController"));
-app.use("/applications", requireAuth, require("./src/applications/applicationController"));
-app.use("/candidates", requireAuth, require("./src/candidates/candidateController"));
-app.use("/users", requireAuth, require("./src/user/userController"));
+app.use("/jobs", requireAuth, require("./src/controllers/jobController"));
+app.use("/applications", requireAuth, require("./src/controllers/applicationController"));
+app.use("/candidates", requireAuth, require("./src/controllers/candidateController"));
+app.use("/users", requireAuth, require("./src/controllers/userController"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
