@@ -19,6 +19,18 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/by-user/:userId", async (req, res) => {
+  try {
+    const candidate = await service.findByUserId(req.params.userId);
+    if (!candidate) {
+      return res.status(404).json({ message: "Candidate not found for this user" });
+    }
+    res.status(200).json({ message: "Candidate found", data: candidate });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching candidate", error: err.message });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const candidates = await service.findAll();

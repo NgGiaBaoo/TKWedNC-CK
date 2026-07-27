@@ -20,4 +20,16 @@ function deleteApplication(id) {
   return ApplicationModel.deleteApplication(id);
 }
 
-module.exports = { createApplication, getAllApplications, getApplicationById, updateApplication, deleteApplication };
+function getApplicationsByJobId(jobId) {
+  return ApplicationModel.getApplicationsByJobId(jobId);
+}
+
+function getApplicationsByCandidateId(candidateId) {
+  return ApplicationModel.getApplicationsByCandidateId(candidateId);
+}
+
+function getApplicationsByEmployerId(employerId) {
+  return ApplicationModel.getApplicationsByEmployerId(employerId);
+}
+
+module.exports = { createApplication, getAllApplications, getApplicationById, updateApplication, deleteApplication, getApplicationsByJobId, getApplicationsByCandidateId, getApplicationsByEmployerId };

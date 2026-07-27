@@ -19,6 +19,18 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
+    if (req.query.candidateId) {
+      const apps = await service.getApplicationsByCandidateId(req.query.candidateId);
+      return res.json(apps);
+    }
+    if (req.query.jobId) {
+      const apps = await service.getApplicationsByJobId(req.query.jobId);
+      return res.json(apps);
+    }
+    if (req.query.employerId) {
+      const apps = await service.getApplicationsByEmployerId(req.query.employerId);
+      return res.json(apps);
+    }
     const applications = await service.getAllApplications();
     res.json(applications);
   } catch (err) {

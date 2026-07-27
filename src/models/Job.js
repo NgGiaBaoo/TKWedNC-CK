@@ -107,6 +107,22 @@ function insertEmployer(companyName, email) {
   });
 }
 
+function getJobsByEmployerId(employerId) {
+  return new Promise((resolve, reject) => {
+    db.query(
+      `SELECT J.JobID, J.JobTitle, J.Salary, J.Location, J.Description, J.EmployerID, E.CompanyName
+       FROM Jobs J
+       LEFT JOIN Employers E ON E.EmployerID = J.EmployerID
+       WHERE J.EmployerID = ?`,
+      [employerId],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results.map(mapJobRow));
+      }
+    );
+  });
+}
+
 module.exports = {
   mapJobRow,
   createJob,
@@ -114,6 +130,7 @@ module.exports = {
   getJobById,
   updateJob,
   deleteJob,
+  getJobsByEmployerId,
   findEmployerByCompany,
   insertEmployer
 };

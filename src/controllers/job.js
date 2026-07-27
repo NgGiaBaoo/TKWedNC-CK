@@ -19,6 +19,10 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
+    if (req.query.employerId) {
+      const jobs = await service.getJobsByEmployerId(req.query.employerId);
+      return res.json(jobs);
+    }
     const jobs = await service.getAllJobs();
     res.json(jobs);
   } catch (err) {

@@ -72,4 +72,17 @@ function remove(id) {
   });
 }
 
-module.exports = { mapCandidateRow, create, findAll, findOne, update, remove };
+function findByUserId(userId) {
+  return new Promise((resolve, reject) => {
+    db.query(
+      "SELECT CandidateID, UserID, FullName, Email, Phone, Skills FROM Candidates WHERE UserID = ? LIMIT 1",
+      [userId],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results[0] ? mapCandidateRow(results[0]) : null);
+      }
+    );
+  });
+}
+
+module.exports = { mapCandidateRow, create, findAll, findOne, update, remove, findByUserId };

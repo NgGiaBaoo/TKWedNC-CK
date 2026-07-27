@@ -20,4 +20,8 @@ function remove(id) {
   return CandidateModel.remove(id);
 }
 
-module.exports = { create, findAll, findOne, update, remove };
+function findByUserId(userId) {
+  return CandidateModel.findByUserId(userId);
+}
+
+module.exports = { create, findAll, findOne, update, remove, findByUserId };

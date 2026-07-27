@@ -18,6 +18,16 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/by-user/:userId", async (req, res) => {
+  try {
+    const employer = await service.findByUserId(req.params.userId);
+    if (!employer) return res.status(404).json({ error: "Employer not found for this user" });
+    res.json(employer);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const employers = await service.getAllEmployers();

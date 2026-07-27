@@ -98,4 +98,17 @@ function insertEmployer(companyName, email) {
   });
 }
 
-module.exports = { mapEmployerRow, createEmployer, getAllEmployers, getEmployerById, updateEmployer, deleteEmployer, findEmployerByCompany, insertEmployer };
+function findByUserId(userId) {
+  return new Promise((resolve, reject) => {
+    db.query(
+      "SELECT EmployerID, UserID, CompanyName, Email, Phone, Address FROM Employers WHERE UserID = ? LIMIT 1",
+      [userId],
+      (err, results) => {
+        if (err) return reject(err);
+        resolve(results[0] ? mapEmployerRow(results[0]) : null);
+      }
+    );
+  });
+}
+
+module.exports = { mapEmployerRow, createEmployer, getAllEmployers, getEmployerById, updateEmployer, deleteEmployer, findEmployerByCompany, insertEmployer, findByUserId };

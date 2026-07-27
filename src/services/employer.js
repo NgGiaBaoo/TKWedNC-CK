@@ -20,4 +20,8 @@ function deleteEmployer(id) {
   return EmployerModel.deleteEmployer(id);
 }
 
-module.exports = { createEmployer, getAllEmployers, getEmployerById, updateEmployer, deleteEmployer };
+function findByUserId(userId) {
+  return EmployerModel.findByUserId(userId);
+}
+
+module.exports = { createEmployer, getAllEmployers, getEmployerById, updateEmployer, deleteEmployer, findByUserId };

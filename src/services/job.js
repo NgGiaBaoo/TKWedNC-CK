@@ -41,4 +41,8 @@ function deleteJob(id) {
   return JobModel.deleteJob(id);
 }
 
-module.exports = { createJob, getAllJobs, getJobById, updateJob, deleteJob };
+function getJobsByEmployerId(employerId) {
+  return JobModel.getJobsByEmployerId(employerId);
+}
+
+module.exports = { createJob, getAllJobs, getJobById, updateJob, deleteJob, getJobsByEmployerId };
