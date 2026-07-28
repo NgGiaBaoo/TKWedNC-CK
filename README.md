@@ -1,71 +1,198 @@
 # TKWedNC-CK
 
-Hệ thống quản lý tuyển dụng (Job Recruitment Management) - REST API với Node.js (Express 5), MySQL (Aiven).
+He thong quan ly tuyen dung (Job Recruitment Management) - Monorepo voi **REST API (Node.js/Express 5)** + **Frontend SPA (React/Vite)**, ket noi **MySQL (Aiven)** qua SSL/TLS.
 
-## Tech Stack
+---
 
-| Công nghệ | Phiên bản | Mục đích |
-|-----------|-----------|----------|
-| **Node.js** | — | Runtime |
-| **Express** | ^5.2.1 | Web framework |
-| **mysql2** | ^3.22.5 | MySQL driver với SSL (Aiven) |
-| **express-session** | ^1.19.0 | Session-based authentication |
-| **bcrypt** | ^6.0.0 | Mã hoá mật khẩu |
-| **cookie-parser** | ^1.4.7 | Parse & sign cookies |
-| **dotenv** | ^17.4.2 | Biến môi trường |
-
-## Kiến trúc (Layer-based)
-
-Khác với mô hình module-folder thông thường, dự án tổ chức theo **tầng (layer)** — mỗi thư mục là một tầng chứa tất cả module:
+## Cau truc thu muc
 
 ```
-src/
-├── config/
-│   └── database.js              // Kết nối MySQL (Aiven, SSL/TLS)
-├── controllers/                 // Route handlers (định nghĩa luôn endpoint)
-│   ├── auth.js        // POST register, login, logout; GET me
-│   ├── employer.js    // CRUD doanh nghiệp
-│   ├── job.js         // CRUD tin tuyển dụng
-│   ├── application.js // CRUD đơn ứng tuyển
-│   ├── candidate.js   // CRUD hồ sơ ứng viên
-│   └── user.js        // CRUD tài khoản
-├── services/                    // Logic nghiệp vụ
-│   ├── auth.js
-│   ├── user.js
-│   ├── employer.js
-│   ├── job.js
-│   ├── application.js
-│   └── candidate.js
-├── models/                      // Truy vấn SQL trực tiếp (callback-based)
-│   ├── UserModel.js
-│   ├── EmployerModel.js
-│   ├── JobModel.js
-│   ├── ApplicationModel.js
-│   └── CandidateModel.js
-├── validators/                  // Validation + normalize dữ liệu đầu vào
-│   ├── auth.js         // Login validation
-│   ├── user.js         // User registration validation
-│   ├── employer.js
-│   ├── job.js
-│   ├── application.js
-│   └── candidate.js
-└── middleware/
-    └── auth.js                  // requireAuth, requireRole
+TKWedNC-CK/
+├── backend/                        # REST API
+│   ├── server.js                   # Entry point
+│   ├── package.json
+│   └── src/
+│       ├── config/
+│       │   ├── database.js         # Ket noi MySQL (Aiven, SSL/TLS)
+│       │   └── ca.pem              # Chứng chỉ SSL Aiven
+│       ├── controllers/            # Route handlers
+│       │   ├── auth.js
+│       │   ├── employer.js
+│       │   ├── job.js
+│       │   ├── application.js
+│       │   ├── candidate.js
+│       │   └── user.js
+│       ├── services/               # Logic nghiệp vụ
+│       │   ├── auth.js
+│       │   ├── employer.js
+│       │   ├── job.js
+│       │   ├── application.js
+│       │   ├── candidate.js
+│       │   └── user.js
+│       ├── models/                 # Truy vấn SQL (callback-based)
+│       │   ├── User.js
+│       │   ├── Employer.js
+│       │   ├── Job.js
+│       │   ├── Application.js
+│       │   └── Candidate.js
+│       ├── validators/             # Validation + normalize đầu vào
+│       │   ├── auth.js
+│       │   ├── user.js
+│       │   ├── employer.js
+│       │   ├── job.js
+│       │   ├── application.js
+│       │   └── candidate.js
+│       └── middleware/
+│           └── auth.js             # requireAuth, requireRole
+│
+├── frontend/                       # React SPA
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── package.json
+│   └── src/
+│       ├── main.jsx                # Entry point
+│       ├── App.jsx                 # Router + Routes
+│       ├── index.css               # Global styles (+1980 dòng)
+│       ├── api/
+│       │   └── axios.js            # Axios instance (proxy /api -> backend)
+│       ├── context/
+│       │   └── AuthContext.jsx     # Quản lý auth state
+│       ├── components/
+│       │   ├── Layout.jsx
+│       │   ├── Sidebar.jsx
+│       │   ├── ProtectedRoute.jsx
+│       │   └── Toast.jsx
+│       └── pages/
+│           ├── Login.jsx
+│           ├── Register.jsx
+│           ├── Dashboard.jsx
+│           ├── Profile.jsx
+│           ├── Jobs.jsx
+│           ├── JobForm.jsx
+│           ├── JobDetail.jsx
+│           ├── BrowseJobs.jsx
+│           ├── Applications.jsx
+│           ├── MyApplications.jsx
+│           ├── EmployerApplications.jsx
+│           ├── Employers.jsx
+│           ├── Candidates.jsx
+│           ├── Users.jsx
+│           └── CompanyProfile.jsx
+│
+├── .env.example
+├── package.json                    # Root: concurrently -> backend + frontend
+└── README.md
 ```
 
-### Luồng xử lý request
+---
+
+## Công nghệ sử dụng
+
+### Backend
+
+| Package | Version | Mục đích |
+|---------|---------|----------|
+| Node.js | - | Runtime |
+| Express | ^5.2.1 | Web framework |
+| mysql2 | ^3.22.5 | MySQL driver (SSL/TLS) |
+| express-session | ^1.19.0 | Session-based auth |
+| bcrypt | ^6.0.0 | Mã hoá mật khẩu |
+| cookie-parser | ^1.4.7 | Parse & sign cookies |
+| dotenv | ^17.4.2 | Biến môi trường |
+
+### Frontend
+
+| Package | Version | Mục đích |
+|---------|---------|----------|
+| React | ^19.2.7 | UI library |
+| Vite | ^8.1.1 | Build tool & dev server |
+| react-router-dom | ^7.18.1 | Client-side routing |
+| axios | ^1.18.1 | HTTP client |
+| dotenv | ^17.4.2 | Biến môi trường |
+
+---
+
+## Authentication
+
+Hệ thống dùng **session-based authentication** (`express-session` + `cookie-parser`).
+
+- **`requireAuth`**: Kiểm tra `req.session.userId` -> 401 nếu chưa đăng nhập.
+- **`requireRole(...roles)`**: Kiểm tra `req.session.role` -> 403 nếu không có quyền.
+
+Vai trò: `Admin` | `Employer` | `Candidate`
+
+### Luồng đăng nhập
 
 ```
-Client → Express Router → Controller → Validator → Service → Model → MySQL
-                                ↓                        ↓
-                          Response ← ← ← ← ← ← ← ← ← ← ←
+Trinh duyet -> axios.post('/api/auth/login')
+                   |
+            Vite proxy (/api -> localhost:3000)
+                   |
+            POST /auth/login
+              -> validate
+              -> authService.login()
+              -> User.findByUsername()
+              -> bcrypt.compare()
+               -> luu userId, username, role vao session
+               -> set cookie connect.sid (signed)
+                    |
+             AuthContext.setUser() -> redirect Dashboard
 ```
 
-## Lưu đồ thuật toán CRUD (Flowchart)
+---
+
+## Frontend Routes
+
+| Path | Trang | Vai trò |
+|------|-------|---------|
+| `/login` | Đăng nhập | Public |
+| `/register` | Đăng ký | Public |
+| `/dashboard` | Tổng quan | Chung |
+| `/profile` | Hồ sơ cá nhân | Chung |
+| `/jobs` | Quản lý tin tuyển dụng | Admin / Employer |
+| `/jobs/new` | Đăng tin mới | Admin / Employer |
+| `/jobs/:id/edit` | Sửa tin | Admin / Employer |
+| `/jobs/browse` | Duyệt việc làm | Candidate |
+| `/jobs/:id` | Chi tiết việc làm | Chung |
+| `/applications` | Quản lý đơn ứng tuyển | Admin |
+| `/candidate/applications` | Đơn đã nộp | Candidate |
+| `/employer/applications` | Đơn nhận được | Employer |
+| `/employers` | Quản lý doanh nghiệp | Admin |
+| `/candidates` | Quản lý ứng viên | Admin |
+| `/users` | Quản lý tài khoản | Admin |
+| `/employer/company` | Hồ sơ công ty | Employer |
+
+---
+
+## Kiến trúc Backend (Layer-based)
+
+Dự án tổ chức theo **tầng (layer)** - mỗi thư mục là một tầng xử lý:
+
+```
+backend/src/
+├── config/         -> database.js, ca.pem
+├── controllers/    -> nhận request, gọi service, trả response
+├── services/       -> logic nghiệp vụ
+├── models/         -> truy vấn SQL
+├── validators/     -> kiểm tra dữ liệu đầu vào
+└── middleware/     -> auth guard
+```
+
+### Luồng xử lý
+
+```
+Request -> Router -> Controller -> Validator -> Service -> Model -> MySQL
+                         |
+                         |
+                    Response <- <- <- <- <- <- <- <- <- <- <- <-
+```
+
+---
+
+## Lưu đồ CRUD
 
 ```mermaid
 flowchart TD
-    %% Định nghĩa style cho các loại node
     classDef process fill:#bbdefb,stroke:#1565c0,stroke-width:2px,color:#0d47a1;
     classDef decision fill:#fff9c4,stroke:#f9a825,stroke-width:2px,color:#e65100;
     classDef error fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#b71c1c;
@@ -114,11 +241,9 @@ flowchart TD
 
     END_RESPONSE(["Response về Client"]):::process
 
-    %% Luồng tiếp nhận request
     START --> ROUTER --> CONTROLLER
     CONTROLLER --> CHK_METHOD
 
-    %% Nhánh POST và PUT -> Validation
     CHK_METHOD --> POST_BRANCH
     CHK_METHOD --> PUT_BRANCH
     POST_BRANCH --> VALIDATE
@@ -127,16 +252,13 @@ flowchart TD
     VALIDATE -->|"Dữ liệu hợp lệ"| VALID_OK
     VALID_FAIL --> END_RESPONSE
 
-    %% Nhánh GET -> Kiểm tra ID
     CHK_METHOD --> GET_BRANCH
     GET_BRANCH --> CHK_ID
     CHK_ID -->|"Không có :id"| GET_LIST
     CHK_ID -->|"Có :id"| GET_ONE
 
-    %% Nhánh DELETE -> thẳng Service
     CHK_METHOD --> DELETE_BRANCH
 
-    %% Các nhánh đổ vào Service
     VALID_OK --> SERVICE
     GET_LIST --> SERVICE
     GET_ONE --> SERVICE
@@ -172,191 +294,169 @@ flowchart TD
     end
 ```
 
-## Authentication
+---
 
-Hệ thống sử dụng **session-based authentication** với `express-session` và `cookie-parser`.
+## Cơ sở dữ liệu
 
-- **`requireAuth`**: Middleware kiểm tra `req.session.userId` — trả về 401 nếu chưa đăng nhập.
-- **`requireRole(...roles)`**: Middleware kiểm tra vai trò (`req.session.role`) — trả về 403 nếu không có quyền.
+Database `JOBRECRUITMENT` trên Aiven gồm 5 bảng:
 
-Tài khoản người dùng được lưu trong bảng `Users` với các vai trò: `Admin`, `Employer`, `Candidate`.
+| Bảng | Mục đích | Cột chính |
+|------|----------|-----------|
+| `Users` | Tài khoản | UserID, Username, PasswordHash, Role |
+| `Employers` | Doanh nghiệp | EmployerID, UserID, CompanyName, Email, Phone, Address |
+| `Jobs` | Tin tuyển dụng | JobID, JobTitle, Salary, Location, Description, EmployerID |
+| `Candidates` | Ứng viên | CandidateID, UserID, FullName, Email, Phone, Skills |
+| `Applications` | Đơn ứng tuyển | ApplicationID, CandidateID, JobID, ApplyDate, Status |
 
-### Luồng đăng nhập
+---
 
-```
-POST /auth/login
-  → validate username + password
-  → authService.login() → UserModel.findUserByUsername() → bcrypt.compare()
-  → Lưu userId, username, role vào session
-  → Set cookie `connect.sid` (signed)
-```
+## API Endpoints
 
-## Cấu hình môi trường (.env)
+> Gọi từ frontend: `axios.post('/api/auth/login', ...)` -> Vite proxy -> `http://localhost:3000/auth/login`  
+> Các endpoint trừ `/auth/register` và `/auth/login` đều yêu cầu **session cookie**.
 
-Tạo file `.env` tại thư mục gốc với các biến sau:
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|-------|
+| POST | `/auth/register` | - | Đăng ký |
+| POST | `/auth/login` | - | Đăng nhập |
+| POST | `/auth/logout` | X | Đăng xuất |
+| GET | `/auth/me` | X | Thông tin user hiện tại |
+| POST | `/employers` | X | Tạo doanh nghiệp |
+| GET | `/employers` | X | Danh sách doanh nghiệp |
+| GET | `/employers/:id` | X | Chi tiết doanh nghiệp |
+| PUT | `/employers/:id` | X | Cập nhật doanh nghiệp |
+| DELETE | `/employers/:id` | X | Xoá doanh nghiệp |
+| POST | `/jobs` | X | Tạo tin tuyển dụng |
+| GET | `/jobs` | X | Danh sách tin |
+| GET | `/jobs/:id` | X | Chi tiết tin |
+| PUT | `/jobs/:id` | X | Cập nhật tin |
+| DELETE | `/jobs/:id` | X | Xoá tin |
+| POST | `/applications` | X | Nộp đơn |
+| GET | `/applications` | X | Danh sách đơn |
+| GET | `/applications/:id` | X | Chi tiết đơn |
+| PUT | `/applications/:id` | X | Cập nhật đơn |
+| DELETE | `/applications/:id` | X | Xoá đơn |
+| POST | `/candidates` | X | Tạo hồ sơ ứng viên |
+| GET | `/candidates` | X | Danh sách ứng viên |
+| GET | `/candidates/:id` | X | Chi tiết ứng viên |
+| PUT | `/candidates/:id` | X | Cập nhật ứng viên |
+| DELETE | `/candidates/:id` | X | Xoá ứng viên |
+| POST | `/users` | X | Tạo tài khoản |
+| GET | `/users` | X | Danh sách tài khoản |
+| GET | `/users/:id` | X | Chi tiết tài khoản |
+| PUT | `/users/:id` | X | Cập nhật tài khoản |
+| DELETE | `/users/:id` | X | Xoá tài khoản |
+
+### Route utility (public)
+
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/visits` | Đếm số truy cập (demo session) |
+| GET | `/set-cookie` | Set signed cookie |
+| GET | `/read-cookie` | Đọc cookie + signed cookie |
+
+> Cookie `connect.sid` được axios gửi tự động nhờ `withCredentials: true`.
+
+---
+
+## Cấu hình môi trường
+
+Tạo file `.env` tại thư mục **gốc** project:
 
 ```env
 SESSION_KEY=your_session_key_here
 COOKIE_SECRET=your_cookie_secret_here
-DB_PASSWORD=database-password-here
-PORT=3000
+
+FRONTEND_PORT=5173
+BACKEND_PORT=3000
+
+DB_HOST=your_database_host
+DB_PORT=your_database_port
+DB_USER=avnadmin
+DB_NAME=JOBRECRUITMENT
+DB_PASSWORD=your_database_password_here
 ```
 
-| Biến | Bắt buộc | Mô tả |
-|------|----------|-------|
-| `SESSION_KEY` | ✅ | Secret key cho express-session |
-| `COOKIE_SECRET` | ✅ | Secret key cho cookie-parser (signed cookies) |
-| `DB_PASSWORD` | ✅ | Mật khẩu database Aiven (user: `avnadmin`, db: `JOBRECRUITMENT`) |
-| `PORT` | ❌ | Cổng server (mặc định: `3000`) |
+| Biến | Bắt buộc | Mặc định | Mô tả |
+|------|----------|----------|-------|
+| `SESSION_KEY` | X | - | Secret cho express-session |
+| `COOKIE_SECRET` | X | - | Secret cho signed cookies |
+| `FRONTEND_PORT` |   | `5173` | Cổng Vite dev server |
+| `BACKEND_PORT` |  | `3000` | Cổng Express server |
+| `DB_HOST` | X | - | Host MySQL Aiven |
+| `DB_PORT` | X | - | Port MySQL Aiven |
+| `DB_USER` | X | `avnadmin` | User database |
+| `DB_NAME` | X | `JOBRECRUITMENT` | Tên database |
+| `DB_PASSWORD` | X | - | Mật khẩu database |
 
-> Certificate SSL (`ca.pem`) đã được include sẵn trong project để kết nối Aiven MySQL qua SSL/TLS.
+> File `backend/src/config/ca.pem` đã được include sẵn để kết nối Aiven MySQL qua SSL/TLS.
 
-## Schema MySQL
+---
 
-Các bảng hiện có trong database `JOBRECRUITMENT` (Aiven):
-
-| Bảng | Mục đích | Cột chính |
-|------|----------|-----------|
-| `Users` | Tài khoản đăng nhập | `UserID`, `Username`, `PasswordHash`, `Role` |
-| `Employers` | Doanh nghiệp đăng tin | `EmployerID`, `UserID`, `CompanyName`, `Email`, `Phone`, `Address` |
-| `Jobs` | Tin tuyển dụng | `JobID`, `JobTitle`, `Salary`, `Location`, `Description`, `EmployerID` |
-| `Candidates` | Hồ sơ ứng viên | `CandidateID`, `UserID`, `FullName`, `Email`, `Phone`, `Skills` |
-| `Applications` | Đơn ứng tuyển | `ApplicationID`, `CandidateID`, `JobID`, `ApplyDate`, `Status` |
-
-## API Endpoints
-
-> Các endpoint `/employers`, `/jobs`, `/applications`, `/candidates`, `/users` yêu cầu **xác thực** (session cookie).  
-> Endpoint `/auth/register` và `/auth/login` là public.
-
-| Method | Endpoint | Auth | Mô tả |
-|--------|----------|------|-------|
-| `POST` | `/auth/register` | ❌ | Đăng ký tài khoản mới |
-| `POST` | `/auth/login` | ❌ | Đăng nhập |
-| `POST` | `/auth/logout` | ✅ | Đăng xuất (huỷ session) |
-| `GET` | `/auth/me` | ✅ | Lấy thông tin user hiện tại |
-| `POST` | `/employers` | ✅ | Tạo doanh nghiệp |
-| `GET` | `/employers` | ✅ | Lấy danh sách doanh nghiệp |
-| `GET` | `/employers/:id` | ✅ | Lấy doanh nghiệp theo ID |
-| `PUT` | `/employers/:id` | ✅ | Cập nhật doanh nghiệp |
-| `DELETE` | `/employers/:id` | ✅ | Xoá doanh nghiệp |
-| `POST` | `/jobs` | ✅ | Tạo job mới |
-| `GET` | `/jobs` | ✅ | Lấy danh sách jobs |
-| `GET` | `/jobs/:id` | ✅ | Lấy job theo ID |
-| `PUT` | `/jobs/:id` | ✅ | Cập nhật job |
-| `DELETE` | `/jobs/:id` | ✅ | Xoá job |
-| `POST` | `/applications` | ✅ | Tạo application mới |
-| `GET` | `/applications` | ✅ | Lấy danh sách applications |
-| `GET` | `/applications/:id` | ✅ | Lấy application theo ID |
-| `PUT` | `/applications/:id` | ✅ | Cập nhật application |
-| `DELETE` | `/applications/:id` | ✅ | Xoá application |
-| `POST` | `/candidates` | ✅ | Tạo candidate mới |
-| `GET` | `/candidates` | ✅ | Lấy danh sách candidates |
-| `GET` | `/candidates/:id` | ✅ | Lấy candidate theo ID |
-| `PUT` | `/candidates/:id` | ✅ | Cập nhật candidate |
-| `DELETE` | `/candidates/:id` | ✅ | Xoá candidate |
-| `POST` | `/users` | ✅ | Tạo user mới |
-| `GET` | `/users` | ✅ | Lấy danh sách users |
-| `GET` | `/users/:id` | ✅ | Lấy user theo ID |
-| `PUT` | `/users/:id` | ✅ | Cập nhật user |
-| `DELETE` | `/users/:id` | ✅ | Xoá user |
-
-> **Lưu ý:** Sau khi đăng nhập thành công, server set session cookie (`connect.sid`). Cookie này được gửi kèm tự động bởi HTTP client.
-
-## Test nhanh bằng Postman / curl
-
-### 1. Đăng ký
+## Hướng dẫn chạy
 
 ```bash
+# 1. Cài tất cả dependencies
+npm install
+cd backend && npm install && cd ..
+cd frontend && npm install && cd ..
+
+# 2. Tạo file .env
+cp .env.example .env
+# điền các thông số phù hợp
+
+# 3. Khởi động cả backend lẫn frontend
+npm run dev
+```
+
+Sau đó:
+- **Frontend**: http://localhost:5173
+- **Backend**: http://localhost:3000
+
+### Chạy riêng từng phần
+
+```bash
+# Chỉ backend
+npm run dev --prefix backend
+
+# Chỉ frontend
+npm run dev --prefix frontend
+```
+
+---
+
+## Thử nghiệm với curl
+
+```bash
+# Đăng ký
 curl -X POST http://localhost:3000/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"username":"NGB123","password":"123456","role":"Candidate"}'
-```
+  -d '{"username":"test1","password":"123456","role":"Candidate"}'
 
-Phản hồi: `201 Created` — tự động đăng nhập sau khi đăng ký.
-
-### 2. Đăng nhập
-
-```bash
+# Đăng nhập
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"NGB123","password":"123456"}'
+  -d '{"username":"test1","password":"123456"}'
+
+# Tạo doanh nghiệp
+curl -X POST http://localhost:3000/employers \
+  -H "Content-Type: application/json" \
+  -d '{"companyName":"Acme Corp","email":"acme@example.com","phone":"0123456789","address":"HCMC"}'
+
+# Tạo tin tuyển dụng
+curl -X POST http://localhost:3000/jobs \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Backend Developer","employerId":1,"location":"Remote","salary":"2500","description":"Node.js role"}'
+
+# Tạo ứng viên
+curl -X POST http://localhost:3000/candidates \
+  -H "Content-Type: application/json" \
+  -d '{"fullName":"John Doe","email":"john@example.com","phone":"0987654321","skills":"Node.js, MySQL"}'
+
+# Nộp đơn ứng tuyển
+curl -X POST http://localhost:3000/applications \
+  -H "Content-Type: application/json" \
+  -d '{"candidateId":1,"jobId":1,"status":"Pending"}'
 ```
 
-Phản hồi: `200 OK` — session cookie được set.
-
-### 3. Tạo doanh nghiệp (yêu cầu auth)
-
-```json
-POST /employers
-{
-    "companyName": "Acme Corp",
-    "email": "acme@example.com",
-    "phone": "0123456789",
-    "address": "HCMC"
-}
-```
-
-### 4. Tạo job (yêu cầu auth)
-
-```json
-POST /jobs
-{
-    "title": "Backend Developer",
-    "employerId": 1,
-    "location": "Remote",
-    "salary": "2500",
-    "description": "Node.js role"
-}
-```
-
-### 5. Tạo candidate (yêu cầu auth)
-
-```json
-POST /candidates
-{
-    "fullName": "John Doe",
-    "email": "john@example.com",
-    "phone": "0987654321",
-    "skills": "Node.js, MySQL"
-}
-```
-
-### 6. Tạo application (yêu cầu auth)
-
-```json
-POST /applications
-{
-    "candidateId": 1,
-    "jobId": 1,
-    "status": "Pending"
-}
-```
-
-> `status` mặc định là `"Pending"` nếu không truyền.
-
-### Route utility (không yêu cầu auth)
-
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| `GET` | `/visits` | Đếm số lần truy cập (demo session) |
-| `GET` | `/set-cookie` | Set signed cookie để test |
-| `GET` | `/read-cookie` | Đọc cookie + signed cookie |
-
-## Cách chạy
-
-```bash
-# 1. Cài dependencies
-npm install
-
-# 2. Tạo file .env (xem cấu hình ở trên)
-cp .env.example .env
-# Sửa DB_PASSWORD, SESSION_KEY, COOKIE_SECRET trong .env
-
-# 3. Khởi động server (development — hot reload)
-npm run dev
-
-# Hoặc production
-npm start
-```
-
-Server chạy tại `http://localhost:3000` (mặc định).
+> Trường `status` mặc định là `"Pending"` nếu không truyền.
