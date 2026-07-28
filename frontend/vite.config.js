@@ -7,10 +7,10 @@ dotenv.config({ path: '../.env' });
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: process.env.FRONTEND_PORT,
+    port: process.env.FRONTEND_PORT || 5173, // Default port : 5173
     proxy: {
       '/api': {
-        target: `http://localhost:${process.env.BACKEND_PORT}`, // Proxy to backend server
+        target: `http://localhost:${process.env.BACKEND_PORT || 3000}`, // Proxy to backend server
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

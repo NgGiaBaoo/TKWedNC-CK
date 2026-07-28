@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router'
 import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
 import { toast } from '../components/Toast'

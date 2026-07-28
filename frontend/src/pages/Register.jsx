@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 
 const roles = [
-  { value: 'Admin', label: 'Admin' },
   { value: 'Employer', label: 'Nhà tuyển dụng' },
   { value: 'Candidate', label: 'Ứng viên' },
 ]
@@ -56,8 +55,9 @@ export default function Register() {
               type="password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              placeholder="Nhập mật khẩu"
+              placeholder="Nhập mật khẩu (ít nhất 8 ký tự)"
               required
+              minLength={8}
             />
           </div>
           <div className="form-group">

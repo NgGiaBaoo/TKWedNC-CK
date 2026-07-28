@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
@@ -52,6 +52,7 @@ export default function Login() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="Nhập mật khẩu"
               required
+              minLength={1}
             />
           </div>
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
