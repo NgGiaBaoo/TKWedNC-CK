@@ -8,17 +8,40 @@ router.post("/", async (req, res) => {
   const valid = validateApplication(payload);
   if (!valid.valid) return res.status(400).json({ error: valid.message });
 
-  const application = normalize(payload);
-  try {
-    const created = await service.createApplication(application);
-    res.status(201).json(created);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    const application = normalize(payload);
+    try {
+      const created = await service.createApplication(application);
+      res.status(201).json(created);
+    } catch (err) {
+      console.error("Error in application:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 router.get("/", async (req, res) => {
   try {
+    const role = req.session.role;
+    const userId = req.session.userId;
+
+    // Candidate: only their own applications
+    if (role === 'Candidate') {
+      const CandidateModel = require('../models/Candidate');
+      const candidate = await CandidateModel.findByUserId(userId);
+      if (!candidate) return res.status(404).json({ error: "No candidate profile found" });
+      const apps = await service.getApplicationsByCandidateId(candidate.id);
+      return res.json(apps);
+    }
+
+    // Employer: only applications for their jobs
+    if (role === 'Employer') {
+      const EmployerModel = require('../models/Employer');
+      const employer = await EmployerModel.findByUserId(userId);
+      if (!employer) return res.status(404).json({ error: "No employer profile found" });
+      const apps = await service.getApplicationsByEmployerId(employer.id);
+      return res.json(apps);
+    }
+
+    // Admin: see everything (including query params for filtering)
     if (req.query.candidateId) {
       const apps = await service.getApplicationsByCandidateId(req.query.candidateId);
       return res.json(apps);
@@ -31,10 +54,12 @@ router.get("/", async (req, res) => {
       const apps = await service.getApplicationsByEmployerId(req.query.employerId);
       return res.json(apps);
     }
+
     const applications = await service.getAllApplications();
     res.json(applications);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in application:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -44,7 +69,8 @@ router.get("/:id", async (req, res) => {
     if (!application) return res.status(404).json({ error: "Not found" });
     res.json(application);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in application:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -57,7 +83,8 @@ router.put("/:id", async (req, res) => {
     if (!ok) return res.status(404).json({ error: "Not found" });
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in application:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -67,7 +94,8 @@ router.delete("/:id", async (req, res) => {
     if (!ok) return res.status(404).json({ error: "Not found" });
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in application:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

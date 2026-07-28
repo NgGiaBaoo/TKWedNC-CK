@@ -6,6 +6,12 @@ function validateJob(payload) {
   if (!payload.employerId && !payload.company) {
     return { valid: false, message: "employerId or company is required" };
   }
+
+  // Validate salary is a number if provided
+  if (payload.salary && isNaN(Number(payload.salary))) {
+    return { valid: false, message: "salary must be a number" };
+  }
+
   return { valid: true };
 }
 

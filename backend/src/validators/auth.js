@@ -7,6 +7,13 @@ function validateLogin(payload) {
     }
   }
 
+  if (payload.password && payload.password.length < 8) {
+    return { valid: false, message: "Password must be at least 8 characters" };
+  }
+  if (payload.password && payload.password.length > 128) {
+    return { valid: false, message: "Password must not exceed 128 characters" };
+  }
+
   return { valid: true };
 }
 

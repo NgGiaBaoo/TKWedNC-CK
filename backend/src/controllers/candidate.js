@@ -15,7 +15,8 @@ router.post("/", async (req, res) => {
     const created = await service.create(candidate);
     res.status(201).json({ message: "Candidate created successfully", data: created });
   } catch (err) {
-    res.status(500).json({ message: "Error creating candidate", error: err.message });
+    console.error("Error in candidate:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -27,7 +28,8 @@ router.get("/by-user/:userId", async (req, res) => {
     }
     res.status(200).json({ message: "Candidate found", data: candidate });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching candidate", error: err.message });
+    console.error("Error in candidate:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -36,7 +38,8 @@ router.get("/", async (req, res) => {
     const candidates = await service.findAll();
     res.status(200).json({ message: "All candidates", data: candidates });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching candidates", error: err.message });
+    console.error("Error in candidate:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -48,7 +51,8 @@ router.get("/:id", async (req, res) => {
     }
     res.status(200).json({ message: "Candidate found", data: candidate });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching candidate", error: err.message });
+    console.error("Error in candidate:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -60,7 +64,8 @@ router.put("/:id", async (req, res) => {
     const updated = await service.update(req.params.id, updates);
     res.status(200).json({ message: "Candidate updated successfully", data: updated });
   } catch (err) {
-    res.status(500).json({ message: "Error updating candidate", error: err.message });
+    console.error("Error in candidate:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -72,7 +77,8 @@ router.delete("/:id", async (req, res) => {
     }
     res.status(200).json({ message: `Candidate with id ${req.params.id} deleted successfully` });
   } catch (err) {
-    res.status(500).json({ message: "Error deleting candidate", error: err.message });
+    console.error("Error in candidate:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

@@ -1,10 +1,53 @@
 # TKWedNC-CK
 
-He thong quan ly tuyen dung (Job Recruitment Management) - Monorepo voi **REST API (Node.js/Express 5)** + **Frontend SPA (React/Vite)**, ket noi **MySQL (Aiven)** qua SSL/TLS.
+Hệ thống quản lý tuyển dụng (Job Recruitment Management) - Monorepo với **REST API (Node.js/Express 5)** + **Frontend SPA (React/Vite)**, kết nối **MySQL (Aiven)** qua SSL/TLS.
 
 ---
 
-## Cau truc thu muc
+## Kiến trúc tổng thể
+
+```mermaid
+graph TB
+    subgraph Client["Trình duyệt"]
+        REACT[React SPA<br/>localhost:5173]
+    end
+
+    subgraph Server["Server"]
+        VITE[Vite Proxy<br/>/api -> :3000]
+        EXPRESS[Express Server<br/>localhost:3000]
+    end
+
+    subgraph Backend["Backend Layers"]
+        CTRL[Controllers]
+        SVC[Services]
+        MDL[Models]
+    end
+
+    subgraph DB["Database"]
+        MYSQL[(MySQL Aiven<br/>SSL/TLS)]
+    end
+
+    REACT -->|axios /api/*| VITE
+    VITE -->|proxy request| EXPRESS
+    EXPRESS --> CTRL
+    CTRL --> SVC
+    SVC --> MDL
+    MDL -->|mysql2| MYSQL
+    MYSQL -->|response| MDL
+    MDL --> SVC
+    SVC --> CTRL
+    CTRL -->|JSON| EXPRESS
+    EXPRESS -->|response| REACT
+
+    style Client fill:#e1f5fe
+    style Server fill:#f3e5f5
+    style Backend fill:#e8f5e9
+    style DB fill:#fff3e0
+```
+
+---
+
+## Cấu trúc thư mục
 
 ```
 TKWedNC-CK/
@@ -13,7 +56,7 @@ TKWedNC-CK/
 │   ├── package.json
 │   └── src/
 │       ├── config/
-│       │   ├── database.js         # Ket noi MySQL (Aiven, SSL/TLS)
+│       │   ├── database.js         # Kết nối MySQL (SSL nếu có ca.pem)
 │       │   └── ca.pem              # Chứng chỉ SSL Aiven
 │       ├── controllers/            # Route handlers
 │       │   ├── auth.js
@@ -52,7 +95,7 @@ TKWedNC-CK/
 │   └── src/
 │       ├── main.jsx                # Entry point
 │       ├── App.jsx                 # Router + Routes
-│       ├── index.css               # Global styles (+1980 dòng)
+│       ├── index.css               # Global styles (~1980 dòng)
 │       ├── api/
 │       │   └── axios.js            # Axios instance (proxy /api -> backend)
 │       ├── context/
@@ -123,25 +166,66 @@ Vai trò: `Admin` | `Employer` | `Candidate`
 
 ### Luồng đăng nhập
 
-```
-Trinh duyet -> axios.post('/api/auth/login')
-                   |
-            Vite proxy (/api -> localhost:3000)
-                   |
-            POST /auth/login
-              -> validate
-              -> authService.login()
-              -> User.findByUsername()
-              -> bcrypt.compare()
-               -> luu userId, username, role vao session
-               -> set cookie connect.sid (signed)
-                    |
-             AuthContext.setUser() -> redirect Dashboard
+```mermaid
+sequenceDiagram
+    actor User as Người dùng
+    participant React as React App
+    participant Vite as Vite Proxy
+    participant Express as Express Server
+    participant Auth as authService
+    participant DB as MySQL
+
+    User->>React: Nhập username + password
+    React->>Vite: axios.post('/api/auth/login', data)
+    Vite->>Express: Proxy /api -> /auth/login
+    Express->>Express: validate(username, password)
+    Express->>Auth: authService.login()
+    Auth->>DB: User.findByUsername()
+    DB-->>Auth: user record
+    Auth->>Auth: bcrypt.compare(password, hash)
+    alt Sai mật khẩu
+        Auth-->>Express: 401 Unauthorized
+        Express-->>React: { error: "Sai mật khẩu" }
+        React-->>User: Hiển thị lỗi
+    else Đúng mật khẩu
+        Auth-->>Express: userId, username, role
+        Express->>Express: Lưu session (connect.sid)
+        Express-->>React: 200 OK + Set-Cookie
+        React->>React: AuthContext.setUser()
+        React-->>User: redirect -> /dashboard
+    end
 ```
 
 ---
 
 ## Frontend Routes
+
+```mermaid
+graph LR
+    Public["Công khai"] --> Login["/login"]
+    Public --> Register["/register"]
+
+    subgraph Protected["Cần đăng nhập"]
+        Chung["Tất cả vai trò"] --> Dash["/dashboard"]
+        Chung --> Profile["/profile"]
+
+        Admin["Admin"] --> Jobs["/jobs"]
+        Admin --> Apps["/applications"]
+        Admin --> Emp["/employers"]
+        Admin --> Cand["/candidates"]
+        Admin --> Users["/users"]
+
+        Employer["Employer"] --> Jobs
+        Employer --> EmpApps["/employer/applications"]
+        Employer --> Company["/employer/company"]
+
+        Candidate["Candidate"] --> Browse["/jobs/browse"]
+        Candidate --> MyApps["/candidate/applications"]
+    end
+
+    style Public fill:#c8e6c9
+    style Protected fill:#bbdefb
+```
 
 | Path | Trang | Vai trò |
 |------|-------|---------|
@@ -166,26 +250,106 @@ Trinh duyet -> axios.post('/api/auth/login')
 
 ## Kiến trúc Backend (Layer-based)
 
-Dự án tổ chức theo **tầng (layer)** - mỗi thư mục là một tầng xử lý:
+Dự án tổ chức theo **tầng (layer)** - mỗi tầng có trách nhiệm riêng, request đi qua lần lượt các tầng:
+
+```mermaid
+graph LR
+    subgraph Layers["Các tầng xử lý"]
+        direction TB
+        MW[Middlware<br/>auth guard] --> CTRL[Controllers<br/>nhận request, trả response]
+        CTRL --> VALID[Validators<br/>kiểm tra đầu vào]
+        VALID --> SVC[Services<br/>logic nghiệp vụ]
+        SVC --> MDL[Models<br/>truy vấn SQL]
+    end
+
+    REQ[Request] --> MW
+    MDL --> MYSQL[(MySQL)]
+    MYSQL --> MDL
+    MDL --> SVC
+    SVC --> CTRL
+    CTRL --> RES[Response]
+
+    style REQ fill:#e1bee7
+    style RES fill:#c8e6c9
+    style MYSQL fill:#fff3e0
+```
+
+### Luồng xử lý request
 
 ```
-backend/src/
-├── config/         -> database.js, ca.pem
-├── controllers/    -> nhận request, gọi service, trả response
-├── services/       -> logic nghiệp vụ
-├── models/         -> truy vấn SQL
-├── validators/     -> kiểm tra dữ liệu đầu vào
-└── middleware/     -> auth guard
+Request -> Router -> Middleware -> Controller -> Validator -> Service -> Model -> MySQL
+                                |                                              |
+                                +--> 401/403 nếu không có quyền                |
+                                                                               v
+                                                                    Response <- <- <-
 ```
 
-### Luồng xử lý
+---
 
+## Cơ sở dữ liệu
+
+### Sơ đồ quan hệ (ERD)
+
+```mermaid
+erDiagram
+    Users ||--o{ Employers : "có"
+    Users ||--o{ Candidates : "có"
+    Employers ||--o{ Jobs : "đăng"
+    Candidates ||--o{ Applications : "nộp"
+    Jobs ||--o{ Applications : "nhận"
+
+    Users {
+        int UserID PK
+        varchar Username
+        varchar PasswordHash
+        enum Role "Admin, Employer, Candidate"
+    }
+
+    Employers {
+        int EmployerID PK
+        int UserID FK
+        varchar CompanyName
+        varchar Email
+        varchar Phone
+        varchar Address
+    }
+
+    Jobs {
+        int JobID PK
+        varchar JobTitle
+        decimal Salary
+        varchar Location
+        text Description
+        int EmployerID FK
+    }
+
+    Candidates {
+        int CandidateID PK
+        int UserID FK
+        varchar FullName
+        varchar Email
+        varchar Phone
+        text Skills
+    }
+
+    Applications {
+        int ApplicationID PK
+        int CandidateID FK
+        int JobID FK
+        datetime ApplyDate
+        enum Status "Pending, Reviewed, Accepted, Rejected"
+    }
 ```
-Request -> Router -> Controller -> Validator -> Service -> Model -> MySQL
-                         |
-                         |
-                    Response <- <- <- <- <- <- <- <- <- <- <- <-
-```
+
+### Các bảng
+
+| Bảng | Mục đích | Cột chính |
+|------|----------|-----------|
+| `Users` | Tài khoản | UserID, Username, PasswordHash, Role |
+| `Employers` | Doanh nghiệp | EmployerID, UserID, CompanyName, Email, Phone, Address |
+| `Jobs` | Tin tuyển dụng | JobID, JobTitle, Salary, Location, Description, EmployerID |
+| `Candidates` | Ứng viên | CandidateID, UserID, FullName, Email, Phone, Skills |
+| `Applications` | Đơn ứng tuyển | ApplicationID, CandidateID, JobID, ApplyDate, Status |
 
 ---
 
@@ -296,20 +460,6 @@ flowchart TD
 
 ---
 
-## Cơ sở dữ liệu
-
-Database `JOBRECRUITMENT` trên Aiven gồm 5 bảng:
-
-| Bảng | Mục đích | Cột chính |
-|------|----------|-----------|
-| `Users` | Tài khoản | UserID, Username, PasswordHash, Role |
-| `Employers` | Doanh nghiệp | EmployerID, UserID, CompanyName, Email, Phone, Address |
-| `Jobs` | Tin tuyển dụng | JobID, JobTitle, Salary, Location, Description, EmployerID |
-| `Candidates` | Ứng viên | CandidateID, UserID, FullName, Email, Phone, Skills |
-| `Applications` | Đơn ứng tuyển | ApplicationID, CandidateID, JobID, ApplyDate, Status |
-
----
-
 ## API Endpoints
 
 > Gọi từ frontend: `axios.post('/api/auth/login', ...)` -> Vite proxy -> `http://localhost:3000/auth/login`  
@@ -319,33 +469,33 @@ Database `JOBRECRUITMENT` trên Aiven gồm 5 bảng:
 |--------|----------|------|-------|
 | POST | `/auth/register` | - | Đăng ký |
 | POST | `/auth/login` | - | Đăng nhập |
-| POST | `/auth/logout` | X | Đăng xuất |
-| GET | `/auth/me` | X | Thông tin user hiện tại |
-| POST | `/employers` | X | Tạo doanh nghiệp |
-| GET | `/employers` | X | Danh sách doanh nghiệp |
-| GET | `/employers/:id` | X | Chi tiết doanh nghiệp |
-| PUT | `/employers/:id` | X | Cập nhật doanh nghiệp |
-| DELETE | `/employers/:id` | X | Xoá doanh nghiệp |
-| POST | `/jobs` | X | Tạo tin tuyển dụng |
-| GET | `/jobs` | X | Danh sách tin |
-| GET | `/jobs/:id` | X | Chi tiết tin |
-| PUT | `/jobs/:id` | X | Cập nhật tin |
-| DELETE | `/jobs/:id` | X | Xoá tin |
-| POST | `/applications` | X | Nộp đơn |
-| GET | `/applications` | X | Danh sách đơn |
-| GET | `/applications/:id` | X | Chi tiết đơn |
-| PUT | `/applications/:id` | X | Cập nhật đơn |
-| DELETE | `/applications/:id` | X | Xoá đơn |
-| POST | `/candidates` | X | Tạo hồ sơ ứng viên |
-| GET | `/candidates` | X | Danh sách ứng viên |
-| GET | `/candidates/:id` | X | Chi tiết ứng viên |
-| PUT | `/candidates/:id` | X | Cập nhật ứng viên |
-| DELETE | `/candidates/:id` | X | Xoá ứng viên |
-| POST | `/users` | X | Tạo tài khoản |
-| GET | `/users` | X | Danh sách tài khoản |
-| GET | `/users/:id` | X | Chi tiết tài khoản |
-| PUT | `/users/:id` | X | Cập nhật tài khoản |
-| DELETE | `/users/:id` | X | Xoá tài khoản |
+| POST | `/auth/logout` | Có | Đăng xuất |
+| GET | `/auth/me` | Có | Thông tin user hiện tại |
+| POST | `/employers` | Có | Tạo doanh nghiệp |
+| GET | `/employers` | Có | Danh sách doanh nghiệp |
+| GET | `/employers/:id` | Có | Chi tiết doanh nghiệp |
+| PUT | `/employers/:id` | Có | Cập nhật doanh nghiệp |
+| DELETE | `/employers/:id` | Có | Xoá doanh nghiệp |
+| POST | `/jobs` | Có | Tạo tin tuyển dụng |
+| GET | `/jobs` | Có | Danh sách tin |
+| GET | `/jobs/:id` | Có | Chi tiết tin |
+| PUT | `/jobs/:id` | Có | Cập nhật tin |
+| DELETE | `/jobs/:id` | Có | Xoá tin |
+| POST | `/applications` | Có | Nộp đơn |
+| GET | `/applications` | Có | Danh sách đơn |
+| GET | `/applications/:id` | Có | Chi tiết đơn |
+| PUT | `/applications/:id` | Có | Cập nhật đơn |
+| DELETE | `/applications/:id` | Có | Xoá đơn |
+| POST | `/candidates` | Có | Tạo hồ sơ ứng viên |
+| GET | `/candidates` | Có | Danh sách ứng viên |
+| GET | `/candidates/:id` | Có | Chi tiết ứng viên |
+| PUT | `/candidates/:id` | Có | Cập nhật ứng viên |
+| DELETE | `/candidates/:id` | Có | Xoá ứng viên |
+| POST | `/users` | Có | Tạo tài khoản |
+| GET | `/users` | Có | Danh sách tài khoản |
+| GET | `/users/:id` | Có | Chi tiết tài khoản |
+| PUT | `/users/:id` | Có | Cập nhật tài khoản |
+| DELETE | `/users/:id` | Có | Xoá tài khoản |
 
 ### Route utility (public)
 
@@ -379,17 +529,18 @@ DB_PASSWORD=your_database_password_here
 
 | Biến | Bắt buộc | Mặc định | Mô tả |
 |------|----------|----------|-------|
-| `SESSION_KEY` | X | - | Secret cho express-session |
-| `COOKIE_SECRET` | X | - | Secret cho signed cookies |
-| `FRONTEND_PORT` |   | `5173` | Cổng Vite dev server |
-| `BACKEND_PORT` |  | `3000` | Cổng Express server |
-| `DB_HOST` | X | - | Host MySQL Aiven |
-| `DB_PORT` | X | - | Port MySQL Aiven |
-| `DB_USER` | X | `avnadmin` | User database |
-| `DB_NAME` | X | `JOBRECRUITMENT` | Tên database |
-| `DB_PASSWORD` | X | - | Mật khẩu database |
+| `SESSION_KEY` | Có | - | Secret cho express-session |
+| `COOKIE_SECRET` | Có | - | Secret cho signed cookies |
+| `FRONTEND_PORT` | Không | `5173` | Cổng Vite dev server |
+| `BACKEND_PORT` | Không | `3000` | Cổng Express server |
+| `DB_HOST` | Có | - | Host MySQL Aiven |
+| `DB_PORT` | Có | - | Port MySQL Aiven |
+| `DB_USER` | Có | `avnadmin` | User database |
+| `DB_NAME` | Có | `JOBRECRUITMENT` | Tên database |
+| `DB_PASSWORD` | Có | - | Mật khẩu database |
 
-> File `backend/src/config/ca.pem` đã được include sẵn để kết nối Aiven MySQL qua SSL/TLS.
+> File `backend/src/config/ca.pem` là **tuỳ chọn**. Nếu có, connection sẽ dùng SSL/TLS.  
+> Nếu không có file, server sẽ thử kết nối không SSL -- nếu server yêu cầu SSL, sẽ báo lỗi "Không tìm thấy file ca.pem".
 
 ---
 

@@ -14,7 +14,8 @@ router.post("/", async (req, res) => {
     const created = await service.createEmployer(normalize(payload));
     res.status(201).json(created);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in employer:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -24,7 +25,8 @@ router.get("/by-user/:userId", async (req, res) => {
     if (!employer) return res.status(404).json({ error: "Employer not found for this user" });
     res.json(employer);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in employer:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -33,7 +35,8 @@ router.get("/", async (req, res) => {
     const employers = await service.getAllEmployers();
     res.json(employers);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in employer:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -43,7 +46,8 @@ router.get("/:id", async (req, res) => {
     if (!employer) return res.status(404).json({ error: "Not found" });
     res.json(employer);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in employer:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -56,7 +60,8 @@ router.put("/:id", async (req, res) => {
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in employer:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -66,7 +71,8 @@ router.delete("/:id", async (req, res) => {
     if (!deleted) return res.status(404).json({ error: "Not found" });
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in employer:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

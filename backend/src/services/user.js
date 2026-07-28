@@ -4,7 +4,7 @@ const UserModel = require("../models/User");
 const SALT_ROUNDS = 10;
 
 function normalizeRole(role) {
-  const allowed = ["Admin", "Employer", "Candidate"];
+  const allowed = ["Employer", "Candidate"];
   if (!role || !allowed.includes(role)) {
     return "Candidate";
   }

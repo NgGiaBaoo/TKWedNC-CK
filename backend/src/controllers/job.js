@@ -13,7 +13,8 @@ router.post("/", async (req, res) => {
     const created = await service.createJob(job);
     res.status(201).json(created);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in job:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -26,7 +27,8 @@ router.get("/", async (req, res) => {
     const jobs = await service.getAllJobs();
     res.json(jobs);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in job:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -36,7 +38,8 @@ router.get("/:id", async (req, res) => {
     if (!job) return res.status(404).json({ error: "Not found" });
     res.json(job);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in job:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -49,7 +52,8 @@ router.put("/:id", async (req, res) => {
     if (!ok) return res.status(404).json({ error: "Not found" });
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in job:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -59,7 +63,8 @@ router.delete("/:id", async (req, res) => {
     if (!ok) return res.status(404).json({ error: "Not found" });
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in job:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

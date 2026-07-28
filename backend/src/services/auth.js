@@ -11,15 +11,18 @@ function login(username, password) {
       const user = await findUserByUsername(username);
 
       if (!user) {
+        console.warn(`[AUDIT] Login failed - username: ${username}, time: ${new Date().toISOString()}, reason: user not found`);
         return resolve({ success: false, message: "Invalid username or password" });
       }
 
       const match = await bcrypt.compare(password, user.PasswordHash);
 
       if (!match) {
+        console.warn(`[AUDIT] Login failed - username: ${username}, time: ${new Date().toISOString()}, reason: wrong password`);
         return resolve({ success: false, message: "Invalid username or password" });
       }
 
+      console.info(`[AUDIT] Login successful - username: ${user.Username}, time: ${new Date().toISOString()}`);
       resolve({
         success: true,
         user: { id: user.UserID, username: user.Username, role: user.Role }
