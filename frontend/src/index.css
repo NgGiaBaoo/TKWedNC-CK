@@ -370,6 +370,23 @@ body {
   font-weight: 500;
 }
 
+/* Status Select Dropdown */
+.status-select {
+  padding: 4px 8px;
+  border: 2px solid;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.status-select:focus {
+  border-color: var(--primary, #2563eb);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;

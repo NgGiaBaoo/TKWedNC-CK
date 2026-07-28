@@ -11,17 +11,17 @@ async function seed() {
     await conn.beginTransaction();
 
     if (force) {
-      console.log('🗑️  Dropping existing data...');
+      console.log('Dropping existing data...');
       await conn.query('DELETE FROM Applications');
       await conn.query('DELETE FROM Jobs');
       await conn.query('DELETE FROM Candidates');
       await conn.query('DELETE FROM Employers');
       await conn.query('DELETE FROM Users');
-      console.log('✅ Existing data cleared.\n');
+      console.log('Existing data cleared.\n');
     }
 
     // ── Users ──
-    console.log('📦 Inserting Users...');
+    console.log('Inserting Users...');
     const adminHash = await bcrypt.hash('admin123', SALT_ROUNDS);
     const empHash = await bcrypt.hash('emp12345', SALT_ROUNDS);
     const candHash = await bcrypt.hash('cand1234', SALT_ROUNDS);
@@ -42,7 +42,7 @@ async function seed() {
     const usersInserted = userResult.affectedRows;
 
     // ── Employers ──
-    console.log('📦 Inserting Employers...');
+    console.log('Inserting Employers...');
     const [empResult] = await conn.query(
       'INSERT INTO Employers (UserID, CompanyName, Email, Phone, Address) VALUES ?',
       [[
@@ -54,7 +54,7 @@ async function seed() {
     const employersInserted = empResult.affectedRows;
 
     // ── Candidates ──
-    console.log('📦 Inserting Candidates...');
+    console.log('Inserting Candidates...');
     const [candResult] = await conn.query(
       'INSERT INTO Candidates (UserID, FullName, Email, Phone, Skills) VALUES ?',
       [[
@@ -67,7 +67,7 @@ async function seed() {
     const candidatesInserted = candResult.affectedRows;
 
     // ── Jobs ──
-    console.log('📦 Inserting Jobs...');
+    console.log('Inserting Jobs...');
     const [jobResult] = await conn.query(
       'INSERT INTO Jobs (JobTitle, Salary, Location, Description, EmployerID) VALUES ?',
       [[
@@ -81,7 +81,7 @@ async function seed() {
     const jobsInserted = jobResult.affectedRows;
 
     // ── Applications ──
-    console.log('📦 Inserting Applications...');
+    console.log('Inserting Applications...');
     await conn.query(
       'INSERT INTO Applications (CandidateID, JobID, ApplyDate, Status) VALUES ?',
       [[
@@ -106,7 +106,7 @@ async function seed() {
     process.exit(0);
   } catch (err) {
     await conn.rollback();
-    console.error('❌ Seed failed:', err.message);
+    console.error('Seed failed:', err.message);
     process.exit(1);
   }
 }

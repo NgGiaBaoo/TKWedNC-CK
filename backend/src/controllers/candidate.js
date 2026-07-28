@@ -5,6 +5,11 @@ const { validateCandidate, normalize } = require("../validators/candidate");
 
 router.post("/", async (req, res) => {
   const payload = req.body || {};
+  // Candidate can only create profile for themselves
+  if (req.session.role === 'Candidate' && payload.userId !== req.session.userId) {
+    return res.status(403).json({ message: "Insufficient permissions" });
+  }
+
   const valid = validateCandidate(payload);
   if (!valid.valid) {
     return res.status(400).json({ message: valid.message });
@@ -58,6 +63,16 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
+    // Candidate can only update own profile
+    if (req.session.role === 'Candidate') {
+      const candidate = await service.findOne(req.params.id);
+      if (!candidate) {
+        return res.status(404).json({ message: `Candidate with id ${req.params.id} not found` });
+      }
+      if (candidate.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Insufficient permissions" });
+      }
+    }
     const updates = Object.fromEntries(
       Object.entries(normalize(req.body || {})).filter(([, v]) => v != null)
     );

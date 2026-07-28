@@ -29,11 +29,16 @@ export default function CompanyProfile() {
     setSaving(true)
     try {
       if (profile) {
-        const res = await api.put(`/employers/${profile.id}`, form)
-        setProfile(res.data)
+        await api.put(`/employers/${profile.id}`, form)
       } else {
-        const res = await api.post('/employers', { ...form, userId: user.id })
-        setProfile(res.data)
+        await api.post('/employers', { ...form, userId: user.id })
+      }
+      // Re-fetch to get updated data
+      const res = await api.get(`/employers/by-user/${user.id}`)
+      const p = res.data
+      if (p) {
+        setProfile(p)
+        setForm({ companyName: p.companyName || '', email: p.email || '', phone: p.phone || '', address: p.address || '' })
       }
       toast('Cập nhật thông tin công ty thành công!')
     } catch (err) {

@@ -75,9 +75,22 @@ router.get("/:id", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  const updates = Object.fromEntries(
-    Object.entries(normalize(req.body || {})).filter(([, v]) => v != null)
-  );
+  // Only update fields actually provided in the request body
+  const allowed = ['candidateId', 'jobId', 'applyDate', 'status'];
+  const updates = {};
+  for (const key of allowed) {
+    if (req.body[key] !== undefined) {
+      let val = req.body[key];
+      // Capitalize status to match DB ENUM ('Pending','Reviewed','Accepted','Rejected')
+      if (key === 'status') {
+        val = String(val).charAt(0).toUpperCase() + String(val).slice(1).toLowerCase();
+      }
+      updates[key] = val;
+    }
+  }
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ error: "No valid fields to update" });
+  }
   try {
     const ok = await service.updateApplication(req.params.id, updates);
     if (!ok) return res.status(404).json({ error: "Not found" });

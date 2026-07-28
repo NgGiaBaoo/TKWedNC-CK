@@ -3,9 +3,12 @@ import api from '../api/axios'
 
 const statusColors = {
   Pending: '#d97706',
-  Approved: '#059669',
+  Reviewed: '#2563eb',
+  Accepted: '#059669',
   Rejected: '#dc2626',
 }
+
+const statusOptions = ['Pending', 'Reviewed', 'Accepted', 'Rejected']
 
 export default function Applications() {
   const [applications, setApplications] = useState([])
@@ -66,17 +69,16 @@ export default function Applications() {
                   </span>
                 </td>
                 <td className="actions">
-                  {app.status === 'Pending' && (
-                    <>
-                      <button className="btn btn-sm btn-approve" onClick={() => handleStatusChange(app.id, 'Approved')}>
-                        Duyệt
-                      </button>
-                      <button className="btn btn-sm btn-reject" onClick={() => handleStatusChange(app.id, 'Rejected')}>
-                        Từ chối
-                      </button>
-                    </>
-                  )}
-                  {app.status !== 'Pending' && <span className="text-muted">--</span>}
+                  <select
+                    value={app.status || 'Pending'}
+                    onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                    className="status-select"
+                    style={{ borderColor: statusColors[app.status] || '#6b7280' }}
+                  >
+                    {statusOptions.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </td>
               </tr>
             ))}

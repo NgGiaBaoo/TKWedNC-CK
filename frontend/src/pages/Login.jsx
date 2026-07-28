@@ -1,13 +1,17 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useNavigate, Navigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
-  const { login } = useAuth()
+  const { user, login, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Already logged in → redirect to dashboard
+  if (authLoading) return <div className="loading">Đang tải...</div>
+  if (user) return <Navigate to="/dashboard" replace />
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -50,9 +54,9 @@ export default function Login() {
               type="password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              placeholder="Nhập mật khẩu"
+              placeholder="Nhập mật khẩu (ít nhất 8 ký tự)"
               required
-              minLength={1}
+              minLength={8}
             />
           </div>
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>

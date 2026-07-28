@@ -1,9 +1,11 @@
+const dotenv = require("dotenv").config({path : '../.env'});
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
+const MySQLStore = require('express-mysql-session')(session);
+const connection = require("./src/config/database");
 const { requireAuth, requireRole } = require("./src/middleware/auth");
 const crypto = require("crypto");
-const dotenv = require("dotenv").config({path : '../.env'});
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -23,9 +25,12 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const sessionStore = new MySQLStore({}, connection);
+
 app.use(
   session({
     secret: process.env.SESSION_KEY,
+    store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -41,11 +46,25 @@ app.use(
 app.use("/auth/login", authLimiter);
 app.use("/auth/register", authLimiter);
 app.use("/auth", require("./src/controllers/auth"));
-app.use("/employers", requireAuth, requireRole("Admin"), require("./src/controllers/employer"));
+// Employers: GET for read, PUT/POST for employer to manage own profile; DELETE is Admin-only
+app.use("/employers", requireAuth, (req, res, next) => {
+  if (req.method === 'GET' || req.method === 'PUT' || req.method === 'POST') return next();
+  requireRole("Admin")(req, res, next);
+}, require("./src/controllers/employer"));
 
 app.use("/jobs", requireAuth, require("./src/controllers/job"));
-app.use("/applications", requireAuth, requireRole("Admin"), require("./src/controllers/application"));
-app.use("/candidates", requireAuth, requireRole("Admin"), require("./src/controllers/candidate"));
+// Applications: GET is role-aware in controller (Candidate sees own, Employer sees own, Admin sees all)
+// POST for Candidates to apply, PUT/DELETE are Admin-only
+app.use("/applications", requireAuth, (req, res, next) => {
+  if (req.method === 'GET' || req.method === 'POST') return next();
+  requireRole("Admin")(req, res, next);
+}, require("./src/controllers/application"));
+// Candidates: GET is role-aware (Candidate/Employer can read own data, Admin sees all)
+// PUT/POST for candidates to manage own profile; DELETE is Admin-only
+app.use("/candidates", requireAuth, (req, res, next) => {
+  if (req.method === 'GET' || req.method === 'PUT' || req.method === 'POST') return next();
+  requireRole("Admin")(req, res, next);
+}, require("./src/controllers/candidate"));
 app.use("/users", requireAuth, requireRole("Admin"), require("./src/controllers/user"));
 
 const PORT = process.env.BACKEND_PORT || 3000; // Default port : 3000

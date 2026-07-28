@@ -57,7 +57,9 @@ export default function MyApplications() {
       ) : (
         <div className="application-cards">
           {apps.map((app) => {
-            const status = app.Status || app.status || 'Unknown'
+            // Normalize status: DB uses "Accepted" but UI uses "Approved"
+            const rawStatus = app.Status || app.status || 'Unknown'
+            const status = rawStatus === 'Accepted' ? 'Approved' : rawStatus
             const cfg = statusConfig[status] || { color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb', icon: '❓' }
             return (
               <div key={app.ApplicationID || app.id} className="application-card" style={{ borderLeftColor: cfg.color }}>

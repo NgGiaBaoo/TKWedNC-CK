@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useNavigate, Navigate } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 
 const roles = [
@@ -8,11 +8,15 @@ const roles = [
 ]
 
 export default function Register() {
-  const { register } = useAuth()
+  const { user, register, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({ username: '', password: '', role: 'Employer' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Already logged in → redirect to dashboard
+  if (authLoading) return <div className="loading">Đang tải...</div>
+  if (user) return <Navigate to="/dashboard" replace />
 
   const handleSubmit = async (e) => {
     e.preventDefault()

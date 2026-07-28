@@ -8,6 +8,11 @@ const { validateUser, normalize: normalizeUser } = require("../validators/user")
 
 // POST /auth/register (public - no auth required)
 router.post("/register", async (req, res) => {
+  // One browser = one account: reject if already logged in
+  if (req.session.userId) {
+    return res.status(409).json({ error: "Đã đăng nhập. Vui lòng đăng xuất trước khi đăng ký tài khoản mới." });
+  }
+
   const payload = req.body;
   const valid = validateUser(payload);
   if (!valid.valid) {
@@ -39,6 +44,11 @@ router.post("/register", async (req, res) => {
 
 // POST /auth/login
 router.post("/login", async (req, res) => {
+  // One browser = one account: reject if already logged in
+  if (req.session.userId) {
+    return res.status(409).json({ error: "Đã đăng nhập. Vui lòng đăng xuất trước khi đăng nhập tài khoản khác." });
+  }
+
   const payload = req.body;
   const valid = validateLogin(payload);
 
@@ -55,19 +65,19 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: result.message });
     }
 
-      // Store user info in session
-      req.session.userId = result.user.id;
-      req.session.username = result.user.username;
-      req.session.role = result.user.role;
+    // Store user info in session
+    req.session.userId = result.user.id;
+    req.session.username = result.user.username;
+    req.session.role = result.user.role;
 
-      res.json({
-        message: "Login successful",
-        data: { id: result.user.id, username: result.user.username, role: result.user.role }
-      });
-    } catch (err) {
-      console.error("Error in auth:", err);
-      res.status(500).json({ error: "Internal server error" });
-    }
+    res.json({
+      message: "Login successful",
+      data: { id: result.user.id, username: result.user.username, role: result.user.role }
+    });
+  } catch (err) {
+    console.error("Error in auth:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // POST /auth/logout
@@ -76,7 +86,12 @@ router.post("/logout", requireAuth, (req, res) => {
     if (err) {
       return res.status(500).json({ error: "Failed to logout" });
     }
-    res.clearCookie("connect.sid");
+    res.clearCookie("connect.sid", {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/'
+    });
     res.json({ message: "Logout successful" });
   });
 });
