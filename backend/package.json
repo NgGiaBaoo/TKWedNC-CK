@@ -22,5 +22,8 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true
   }
 }
